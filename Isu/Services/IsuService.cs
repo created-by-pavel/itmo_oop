@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Runtime.Intrinsics.X86;
 using Isu.Models;
 using Isu.Tools;
 
@@ -15,7 +16,7 @@ namespace Isu.Services
             {
                 int n;
                 string sub = name.Substring(2);
-                if (name.Length > 6 || name[0] != 'M' || name[1] != '3' || (int.TryParse(sub, out n) == false))
+                if (name.Length != 5 || !name.StartsWith("M3") || !int.TryParse(sub, out n))
                 {
                     throw new IsuException("bad group name");
                 }
@@ -32,14 +33,10 @@ namespace Isu.Services
 
             public Student AddStudent(Group group, string name)
             {
-                if (_groups.Contains(group))
-                {
-                    var student = new Student(name);
-                    group.AddStud(student);
-                    return student;
-                }
-
-                throw new IsuException("this group doesnt exist");
+                if (!_groups.Contains(group)) throw new IsuException("this group doesnt exist");
+                var student = new Student(name);
+                group.AddStud(student);
+                return student;
             }
 
             public Student GetStudent(int id)
@@ -54,41 +51,27 @@ namespace Isu.Services
 
             public Student FindStudent(string name)
             {
+                var st = new Student();
                 foreach (Group group in _groups)
                 {
-                    return group.GetByName(name);
+                    st = group.GetByName(name);
                 }
 
-                throw new IsuException("name of student not found");
+                return st;
             }
 
             public List<Student> FindStudents(string groupName)
             {
-                foreach (Group group in _groups)
-                {
-                    if (group.GetGroupName() == groupName)
-                    {
-                        return group.GetByGroupName();
-                    }
-                }
-
-                throw new IsuException("group not found");
+                Group group = _groups.FirstOrDefault(g => g.GetGroupName() == groupName);
+                return group?.GetStudents();
             }
 
             public List<Student> FindStudents(CourseNumber courseNumber)
             {
                 var unitedStudents = new List<Student>();
-                foreach (Group group in _groups)
+                foreach (Group group in _groups.Where(g => g.GetCourseNumFromGroup() == (int)courseNumber))
                 {
-                    if (group.GetCourseNumFromGroup() == (int)courseNumber)
-                    {
-                        unitedStudents.AddRange(group.GetStudents());
-                    }
-                }
-
-                if (unitedStudents.Count == 0)
-                {
-                    throw new IsuException("this course doesnt exist");
+                    unitedStudents.AddRange(group.GetStudents());
                 }
 
                 return unitedStudents;
@@ -96,34 +79,12 @@ namespace Isu.Services
 
             public Group FindGroup(string groupName)
             {
-                foreach (Group group in _groups)
-                {
-                    if (group.GetGroupName() == groupName)
-                    {
-                        return group;
-                    }
-                }
-
-                throw new IsuException("group not found");
+                return _groups.FirstOrDefault(g => g.GetGroupName() == groupName);
             }
 
             public List<Group> FindGroups(CourseNumber courseNumber)
             {
-                var unitedGroups = new List<Group>();
-                foreach (Group group in _groups)
-                {
-                    if (group.GetCourseNumFromGroup() == (int)courseNumber)
-                    {
-                        unitedGroups.Add(group);
-                    }
-                }
-
-                if (unitedGroups.Count == 0)
-                {
-                    throw new IsuException("this course doesnt exist");
-                }
-
-                return unitedGroups;
+                return _groups.Where(g => g.GetCourseNumFromGroup() == (int)courseNumber).ToList();
             }
 
             public void ChangeStudentGroup(Student student, Group newGroup)
