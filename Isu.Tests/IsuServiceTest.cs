@@ -12,21 +12,18 @@ namespace Isu.Tests
         [SetUp]
         public void Setup()
         {
-            //TODO: implement
             _isuService = new IsuService();
         }
         
         [Test]
         public void AddStudentToGroup_GroupContainsStudent_ThrowException()
         {
-            try
+            Assert.Catch<IsuException>(() =>
             {
                 Group group = _isuService.AddGroup("M3207");
                 _isuService.AddStudent(group, "Pavel Zavalnyuk");
                 _isuService.AddStudent(group, "Pavel Zavalnyuk");
-                Assert.Fail();
-            }
-            catch (IsuException) { }
+            });
         }
 
         [Test]
@@ -62,7 +59,6 @@ namespace Isu.Tests
                 var newGroup = new Group("M3211");
                 Group group = _isuService.AddGroup("M3209");
                 Student student = _isuService.AddStudent(group, "Pavel Zavalnyuk");
-                
                 _isuService.ChangeStudentGroup(student, newGroup);
             });
         }

@@ -35,6 +35,6 @@ namespace Isu.Models
                 return Equals(studentObj);
         }
 
-        public override int GetHashCode() => (_name, _id).GetHashCode();
+        public override int GetHashCode() => _name.GetHashCode() ^ _id.GetHashCode();
     }
 }

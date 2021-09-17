@@ -22,7 +22,11 @@ namespace Isu.Models
             private short StudentsCount => (short)_students.Count;
             public string GetGroupName() => _groupName;
 
-            public List<Student> GetStudents() => _students;
+            public List<Student> GetStudents()
+            {
+                List<Student> copyStudents = _students;
+                return copyStudents;
+            }
 
             public void AddStud(Student student)
             {
@@ -46,7 +50,7 @@ namespace Isu.Models
 
             public Student GetByName(string name)
             {
-                return _students.FirstOrDefault(s => s.GetName() == name);
+                return _students.First(s => s.GetName() == name);
             }
 
             public bool ContainsStudent(Student student) => _students.Contains(student);
@@ -59,28 +63,16 @@ namespace Isu.Models
 
             public bool Equals(Group other)
             {
-                if (other == null)
-                    return false;
-                if (_groupName == other._groupName)
-                    return true;
-                else
-                    return false;
+                if (other == null) return false;
+                return _groupName == other._groupName;
             }
 
             public override bool Equals(object obj)
             {
-                if (obj == null)
-                    return false;
-
-                if (obj is not Group groupObj)
-                    return false;
-                else
-                    return Equals(groupObj);
+                if (obj is not Group groupObj) return false;
+                return Equals(groupObj);
             }
-
-            public override int GetHashCode()
-            {
-                return (_groupName, _courseNum).GetHashCode();
-            }
+            
+            public override int GetHashCode() => _groupName.GetHashCode() ^ _courseNum.GetHashCode();
         }
 }

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO.Enumeration;
 using System.Linq;
 using System.Runtime.Intrinsics.X86;
 using Isu.Models;
@@ -14,9 +15,8 @@ namespace Isu.Services
 
             public Group AddGroup(string name)
             {
-                int n;
                 string sub = name.Substring(2);
-                if (name.Length != 5 || !name.StartsWith("M3") || !int.TryParse(sub, out n))
+                if (name.Length != 5 || !name.StartsWith("M3") || !int.TryParse(sub, out int n))
                 {
                     throw new IsuException("bad group name");
                 }
@@ -51,19 +51,20 @@ namespace Isu.Services
 
             public Student FindStudent(string name)
             {
-                var st = new Student();
+                Student student = null;
                 foreach (Group group in _groups)
                 {
-                    st = group.GetByName(name);
+                    student = group.GetByName(name);
                 }
 
-                return st;
+                return student;
             }
 
             public List<Student> FindStudents(string groupName)
             {
+                var emptyList = Enumerable.Empty<Student>().ToList();
                 Group group = _groups.FirstOrDefault(g => g.GetGroupName() == groupName);
-                return group?.GetStudents();
+                return group?.GetStudents() ?? emptyList;
             }
 
             public List<Student> FindStudents(CourseNumber courseNumber)
