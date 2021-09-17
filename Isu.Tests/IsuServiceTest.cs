@@ -17,7 +17,7 @@ namespace Isu.Tests
         }
         
         [Test]
-        public void AddStudentToGroup_StudentHasGroupAndGroupContainsStudent()
+        public void AddStudentToGroup_GroupContainsStudent_ThrowException()
         {
             try
             {
@@ -55,14 +55,14 @@ namespace Isu.Tests
         }
 
         [Test]
-        public void TransferStudentToAnotherGroup_GroupChanged()
+        public void TransferStudentToGroupWhichDoesntExist_ThrowException()
         {
             Assert.Catch<IsuException>(() => 
             {
                 var newGroup = new Group("M3211");
-                _isuService.AddGroup("M3209");
-                _isuService.AddGroup("M3207");
-                var student = new Student("Pavel Zavalnyuk");
+                Group group = _isuService.AddGroup("M3209");
+                Student student = _isuService.AddStudent(group, "Pavel Zavalnyuk");
+                
                 _isuService.ChangeStudentGroup(student, newGroup);
             });
         }
