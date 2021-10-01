@@ -24,6 +24,6 @@ namespace Shops.Models
         public void SetMoney(decimal money)
         {
             _wallet = money;
-        }
+        }   // hello world
     }
 }
