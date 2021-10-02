@@ -43,8 +43,8 @@ namespace Shops.Models
 
         public bool CanSell(decimal money, Dictionary<Product, int> shoppingList)
         {
-            int totalPrice = 0;
-            return shoppingList.Keys.All(product => money >= (totalPrice += _productPrice[product] * shoppingList[product]));
+            int totalPrice = shoppingList.Keys.Sum(product => _productPrice[product] * shoppingList[product]);
+            return money >= totalPrice;
         }
 
         public decimal Buy(Dictionary<Product, int> shoppingList, decimal money)
