@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using Isu.Tools;
 namespace Isu.Models
 {
@@ -72,7 +71,7 @@ namespace Isu.Models
                 if (obj is not Group groupObj) return false;
                 return Equals(groupObj);
             }
-            
+
             public override int GetHashCode() => _groupName.GetHashCode() ^ _courseNum.GetHashCode();
         }
 }
