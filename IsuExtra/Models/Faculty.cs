@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-using Isu.Tools;
+using IsuExtra.Tools;
 
 namespace IsuExtra.Models
 {
@@ -38,7 +38,7 @@ namespace IsuExtra.Models
         public Ognp GetOgnp() => _ognp;
         public void AddOgnp(Ognp ognp)
         {
-            if (_ognpCount >= 1) throw new IsuException("too much ognp, body");
+            if (_ognpCount >= 1) throw new IsuExtraException("too much ognp, body");
             _ognp = ognp;
             _ognpCount++;
         }
