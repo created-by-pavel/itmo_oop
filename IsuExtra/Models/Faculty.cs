@@ -16,26 +16,35 @@ namespace IsuExtra.Models
         {
             _name = name;
             _symbols = symbols;
-            _courses = new List<Course>(4);
-            Course course1 = new Course();
-            Course course2 = new Course();
-            Course course3 = new Course();
-            Course course4 = new Course();
-            _courses.Add(course1);
-            _courses.Add(course2);
-            _courses.Add(course3);
-            _courses.Add(course4);
+            Course course1 = new (), course2 = new (), course3 = new (), course4 = new ();
+            _courses = new List<Course>(4) { course1, course2, course3, course4 };
         }
 
         public void AddGroup(Group group)
         {
+            string sub = group.GetName()[1..];
+            if (group.GetName().Length != 5 || !int.TryParse(sub, out int n)) throw new IsuExtraException("invalid groupName");
             _courses[Convert.ToInt32(group.GetName()[2].ToString())].AddGroup(group);
         }
 
-        public Course GetCourse(int num) => _courses[num];
+        public Course GetCourse(int num)
+        {
+            Course copy = _courses[num];
+            return copy;
+        }
 
-        public string GetSymbols() => _symbols;
-        public Ognp GetOgnp() => _ognp;
+        public string GetSymbols()
+        {
+            string copy = _symbols;
+            return copy;
+        }
+
+        public Ognp GetOgnp()
+        {
+            Ognp copy = _ognp;
+            return copy;
+        }
+
         public void AddOgnp(Ognp ognp)
         {
             if (_ognpCount >= 1) throw new IsuExtraException("too much ognp, body");

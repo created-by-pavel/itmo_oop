@@ -17,7 +17,7 @@ namespace IsuExtra.Tests
         private OgnpGroup _s1;
         private OgnpGroup _w1;
         private OgnpGroup _l1;
-        
+
         [SetUp]
         public void Setup()
         {
@@ -46,18 +46,20 @@ namespace IsuExtra.Tests
         public void AddLessonToOgnpGroup()
         {
             Lesson kali = _isuExtraService.AddLessonToOgnpGroup("kali", Time.Ten, Day.Monday, "KotDimos", 100, _k1);
-            var checkKali = new Lesson("kali", "KotDimos", 100);
-            Dictionary<int, List<(int, Lesson)>> check = new();
-            List<(int, Lesson)> checklist = new () {(2, checkKali)};
-            check.Add(1,checklist);
-            Assert.AreEqual(check,_k1.GetTimetable());
+            var copyKaliLesson = new Lesson("kali", "KotDimos", 100);
+            var expectedTimetable = new Dictionary<int, List<(int, Lesson)>>() {
+                { (int)Day.Monday, new List<(int, Lesson)>() {
+                    {((int)Time.Ten, copyKaliLesson)}
+                }}
+            };
+            CollectionAssert.AreEqual(expectedTimetable,_k1.GetTimetable());
         }
         
         [Test]
         public void AddStudentToOgnpGroup()
         {
             _isuExtraService.AddStudentToOgnpGroup(_pavel, _cyber, _k1);
-            Assert.AreEqual(_k1.GetStudents().Contains(_pavel), true);
+            CollectionAssert.Contains(_k1.GetStudents(), _pavel);
         }
 
         [Test]
@@ -103,16 +105,16 @@ namespace IsuExtra.Tests
         [Test]
         public void GetStudentNotInOgnp()
         {
-            List<Student> check = new() {_pavel, _sasha};
+            List<Student> expectedStudents = new() {_pavel, _sasha};
             List<Student> notInOgnpStudents = _isuExtraService.GetStudentNotInOgnp(_m3207);
-            Assert.AreEqual(check, notInOgnpStudents);
+            CollectionAssert.AreEqual(expectedStudents, notInOgnpStudents);
         }
         
         [Test]
         public void GetOgnpGroups()
         {
             List<OgnpGroup> ognpGroups = new() {_k1, _k2};
-            Assert.AreEqual(ognpGroups, _cyber.GetOgnpGroups());
+            CollectionAssert.AreEqual(ognpGroups, _cyber.GetOgnpGroups());
         }
         
         [Test]
@@ -120,7 +122,7 @@ namespace IsuExtra.Tests
         {
             _isuExtraService.AddStudentToOgnpGroup(_pavel, _cyber, _k1);
             List<Student> students = new() {_pavel};
-            Assert.AreEqual(students, _isuExtraService.GetStudentsInOgnpGroup(_k1, _cyber));
+            CollectionAssert.AreEqual(students, _isuExtraService.GetStudentsInOgnpGroup(_k1, _cyber));
         }
         
         [Test]
@@ -128,7 +130,7 @@ namespace IsuExtra.Tests
         {
             _isuExtraService.AddStudentToOgnpGroup(_pavel, _cyber, _k1);
             _isuExtraService.RemoveStudentFromOgnp(_pavel, _cyber);
-            Assert.AreEqual(false, _k1.GetStudents().Contains(_pavel));
+            CollectionAssert.DoesNotContain(_k1.GetStudents(), _pavel);
         }
     }
 }

@@ -11,12 +11,16 @@ namespace IsuExtra.Models
         private readonly string _groupName;
         private readonly List<Student> _students;
         private readonly Dictionary<int, List<(int, Lesson)>> _timetable;
+        public Group() { }
+
         public Group(string groupName)
         {
             _groupName = groupName;
             _students = new List<Student>();
             _timetable = new Dictionary<int, List<(int, Lesson)>>();
         }
+
+        public int GetCourseNumber => Convert.ToInt32(GetName()[2].ToString());
 
         private short StudentsCount => (short)_students.Count;
 
@@ -70,7 +74,7 @@ namespace IsuExtra.Models
         public bool Equals(Group other)
         {
             if (other == null) return false;
-            return _groupName == other._groupName;
+            return string.Equals(_groupName, other._groupName, StringComparison.OrdinalIgnoreCase);
         }
 
         public override bool Equals(object obj)

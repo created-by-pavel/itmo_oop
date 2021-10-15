@@ -6,25 +6,22 @@ namespace IsuExtra.Models
     {
         private readonly string _id;
         private readonly string _name;
-        private short _ognpCount = 0;
         public Student(string name)
         {
             _name = name;
             _id = Guid.NewGuid().ToString();
         }
 
-        public string GetId() => _id;
-        public string GetName() => _name;
-        public short GetOgnpCount() => _ognpCount;
-
-        public void PlusOgnp()
+        public string GetId()
         {
-            _ognpCount++;
+            string copy = _id;
+            return copy;
         }
 
-        public void MinusOgnp()
+        public string GetName()
         {
-            _ognpCount--;
+            string copy = _name;
+            return copy;
         }
 
         public bool Equals(Student other)
