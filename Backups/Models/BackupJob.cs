@@ -16,7 +16,16 @@ namespace Backups.Models
         public BackupJob(JobObject jobObject, string name, DirectoryInfo repository)
         {
             _jobObject = jobObject;
-            if (!repository.Exists) repository.Create();
+            try
+            {
+                if (!repository.Exists)
+                    repository.Create();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("cant create", e.ToString());
+            }
+
             if (repository.GetDirectories().FirstOrDefault(dir => dir.Name == name) == null)
             {
                 _backupJobDirectory = repository.CreateSubdirectory(name);
