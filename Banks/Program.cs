@@ -10,7 +10,7 @@ namespace Banks
     {
         private static void Main(string[] args)
         {
-            /*var time = new Time();
+            var time = new Time();
             var bs = new BankSystem(time);
             string name, surname, address, passportId, bankName, choice, accountNumber;
             decimal trustFactorLimit, debitPercent, creditLimit, creditCommission, sum, percent, money;
@@ -308,7 +308,7 @@ namespace Banks
 
                         break;
                 }
-            }*/
+            }
         }
     }
 }

@@ -1,3 +1,5 @@
+using Banks.Tools;
+
 namespace Banks.Models
 {
     public class TransferCommand : ICommand
@@ -20,8 +22,9 @@ namespace Banks.Models
 
         public void Undo()
         {
+            if (_accountFrom == null && _accountTo == null) throw new BanksException("this command not exit");
             _accountFrom.TopUp(_money);
-            _accountTo.MinusSum(_money);
+            _accountTo.WithDraw(_money);
         }
     }
 }

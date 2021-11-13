@@ -1,4 +1,5 @@
 using System;
+using Banks.Tools;
 
 namespace Banks.Models
 {
@@ -20,8 +21,8 @@ namespace Banks.Models
 
         public void Undo()
         {
-            Console.WriteLine(_money);
-            _receiver.MinusSum(_money);
+            if (_receiver == null) throw new BanksException("this command not exit");
+            _receiver.WithDraw(_money);
         }
     }
 }

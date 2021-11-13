@@ -1,3 +1,5 @@
+using Banks.Tools;
+
 namespace Banks.Models
 {
     public class WithDrawCommand : ICommand
@@ -18,6 +20,7 @@ namespace Banks.Models
 
         public void Undo()
         {
+            if (_receiver == null) throw new BanksException("this command not exit");
             _receiver.TopUp(_money);
         }
     }

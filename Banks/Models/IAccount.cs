@@ -11,7 +11,6 @@ namespace Banks.Models
         public decimal GetBalance();
         public void TopUpPercentOrCommission(decimal money);
         public void PercentOrCommissionBalanceToZero();
-        public void MinusSum(decimal money);
         public DateTime GetTimeStart();
         public decimal GetPercentOrCommissionBalance();
     }
