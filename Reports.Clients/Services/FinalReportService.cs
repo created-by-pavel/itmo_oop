@@ -4,26 +4,27 @@ using System.IO;
 using System.Net;
 using System.Text;
 using Newtonsoft.Json;
+using Reports.Clients.Interfaces;
 using Reports.DAL.Entities;
 
 namespace Reports.Clients
 {
-    public class FinalReportService
+    public class FinalReportService : IFinalReportService
     {
         public void CreateReport(Guid teamLeadId)
         {
             // Запрос к серверу
-            var request = HttpWebRequest.Create($"https://localhost:5001/finalReports/Create?{teamLeadId}");
+            var request = WebRequest.Create($"https://localhost:5001/finalReports/Create/?teamLeadId={teamLeadId}");
             request.Method = WebRequestMethods.Http.Post;
-            var response = request.GetResponse();
+            WebResponse response = request.GetResponse();
 
             // Чтение ответа
-            var responseStream = response.GetResponseStream();
+            Stream responseStream = response.GetResponseStream();
             using var readStream = new StreamReader(responseStream, Encoding.UTF8);
-            var responseString = readStream.ReadToEnd();
+            string responseString = readStream.ReadToEnd();
 
             // Десериализация (перевод JSON'a к C# классу)
-            var finalReport = JsonConvert.DeserializeObject<FinalReport>(responseString);
+            FinalReport finalReport = JsonConvert.DeserializeObject<FinalReport>(responseString);
 
             Console.WriteLine("Created finalReport:");
             Console.WriteLine($"Id: {finalReport.Id}");
@@ -31,21 +32,21 @@ namespace Reports.Clients
             Console.WriteLine($"TeamLead: {finalReport.TeamLeadId}");
         }
 
-        public void DoFinalReport(Guid finalReportId)
+        public void DoFinalReport(Guid id)
         {
-            var request = HttpWebRequest.Create($"https://localhost:5001/finalReports/Do?{finalReportId}");
+            var request = WebRequest.Create($"https://localhost:5001/finalReports/Do/?tid={id}");
             request.Method = WebRequestMethods.Http.Get;
-            var response = request.GetResponse();
+            WebResponse response = request.GetResponse();
 
             // Чтение ответа
-            var responseStream = response.GetResponseStream();
+            Stream responseStream = response.GetResponseStream();
             using var readStream = new StreamReader(responseStream, Encoding.UTF8);
-            var responseString = readStream.ReadToEnd();
+            string responseString = readStream.ReadToEnd();
 
             // Десериализация (перевод JSON'a к C# классу)
-            var reports = JsonConvert.DeserializeObject<List<Report>>(responseString);
+            List<Report> reports = JsonConvert.DeserializeObject<List<Report>>(responseString);
 
-            foreach (var report in reports)
+            foreach (Report report in reports)
             {
                 Console.WriteLine("reports:");
                 Console.WriteLine($"Id: {report.Id}");
@@ -53,52 +54,51 @@ namespace Reports.Clients
                 Console.WriteLine($"Status: {report.Status}");
                 Console.WriteLine($"CreationTime: {report.CreationTime}");
                 Console.WriteLine($"Id: {report.EmployeeId}");
-                Console.WriteLine($"LastCommitDate: {report.LastCommitDate}");
+                Console.WriteLine($"LastCommitDate: {report.LastCommitDate}/n");
             }
         }
 
-        public void FindFinalReportById(Guid finalReportId)
+        public void FindFinalReportById(Guid id)
         {
-            var request = HttpWebRequest.Create($"https://localhost:5001/finalReports/GetById?id={finalReportId}");
+            var request = WebRequest.Create($"https://localhost:5001/finalReports/GetById/?id={id}");
             request.Method = WebRequestMethods.Http.Get;
 
             try
             {
-                var response = request.GetResponse();
+                WebResponse response = request.GetResponse();
 
-                var responseStream = response.GetResponseStream();
+                Stream responseStream = response.GetResponseStream();
                 using var readStream = new StreamReader(responseStream, Encoding.UTF8);
-                var responseString = readStream.ReadToEnd();
+                string responseString = readStream.ReadToEnd();
 
-                var finalReport = JsonConvert.DeserializeObject<FinalReport>(responseString);
+                FinalReport? finalReport = JsonConvert.DeserializeObject<FinalReport>(responseString);
 
-                Console.WriteLine("Created finalReport:");
+                Console.WriteLine("finalReport was found:");
                 Console.WriteLine($"Id: {finalReport.Id}");
                 Console.WriteLine($"CreationTime: {finalReport.CreationTime}");
                 Console.WriteLine($"TeamLead: {finalReport.TeamLeadId}");
             }
             catch (WebException e)
             {
-                Console.WriteLine("Employee was not found");
+                Console.WriteLine("finalReport was not found");
                 Console.Error.WriteLine(e.Message);
             }
         }
         
         public void GetAll()
         {
-            var request = HttpWebRequest.Create($"https://localhost:5001/finalReports/GetAll");
+            var request = WebRequest.Create($"https://localhost:5001/finalReports/GetAll");
             request.Method = WebRequestMethods.Http.Get;
 
             try
             {
-                var response = request.GetResponse();
-                var responseStream = response.GetResponseStream();
+                WebResponse response = request.GetResponse();
+                Stream responseStream = response.GetResponseStream();
                 using var readStream = new StreamReader(responseStream, Encoding.UTF8);
-                var responseString = readStream.ReadToEnd();
-                var finalReports = JsonConvert.DeserializeObject<List<FinalReport>>(responseString);
-                Console.WriteLine("Found employees:");
-                
-                foreach (var finalReport in finalReports)
+                string responseString = readStream.ReadToEnd();
+                List<FinalReport> finalReports = JsonConvert.DeserializeObject<List<FinalReport>>(responseString);
+
+                foreach (FinalReport finalReport in finalReports)
                 {
                     Console.WriteLine("Created finalReport:");
                     Console.WriteLine($"Id: {finalReport.Id}");
@@ -108,7 +108,7 @@ namespace Reports.Clients
             }
             catch (WebException e)
             {
-                Console.WriteLine("Employee was not found");
+                Console.WriteLine("finalReports was not found");
                 Console.Error.WriteLine(e.Message);
             }
         }

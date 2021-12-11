@@ -4,29 +4,27 @@ using System.IO;
 using System.Net;
 using System.Text;
 using Newtonsoft.Json;
+using Reports.Clients.Interfaces;
 using Reports.DAL.Entities;
 using Reports.DAL.Statuses;
 
 namespace Reports.Clients
 {
-    public class TaskService
+    public class TaskService : ITaskService
     {
-        public void CreateTask(Guid teamLeadId)
+        public void CreateTask(string name, Guid employeeId, Guid finalReportId)
         {
-            // Запрос к серверу
-            var request = HttpWebRequest.Create($"https://localhost:5001/tasks/Create");
+            var request = WebRequest.Create($"https://localhost:5001/tasks/Create/?name={name}&&employeeId={employeeId}&&finalReportId={finalReportId}");
             request.Method = WebRequestMethods.Http.Post;
-            var response = request.GetResponse();
-
-            // Чтение ответа
-            var responseStream = response.GetResponseStream();
+            WebResponse response = request.GetResponse();
+            
+            Stream responseStream = response.GetResponseStream();
             using var readStream = new StreamReader(responseStream, Encoding.UTF8);
-            var responseString = readStream.ReadToEnd();
+            string responseString = readStream.ReadToEnd();
+            
+            TaskModel task = JsonConvert.DeserializeObject<TaskModel>(responseString);
 
-            // Десериализация (перевод JSON'a к C# классу)
-            var task = JsonConvert.DeserializeObject<TaskModel>(responseString);
-
-            Console.WriteLine("Created Report:");
+            Console.WriteLine("Task Created:");
             Console.WriteLine($"Id: {task.Id}");
             Console.WriteLine($"Content: {task.Name}");
             Console.WriteLine($"Status: {task.Status}");
@@ -37,40 +35,35 @@ namespace Reports.Clients
             Console.WriteLine($"LastCommitDate: {task.FinalReportId}");
         }
         
-        public void Deletet(Guid id)
+        public void Delete(Guid id)
         {
-            // Запрос к серверу
-            var request = HttpWebRequest.Create($"https://localhost:5001/tasks/Delete?{id}");
+            var request = WebRequest.Create($"https://localhost:5001/tasks/Delete/?id={id}");
             request.Method = WebRequestMethods.Http.Get;
-            var response = request.GetResponse();
-
-            // Чтение ответа
-            var responseStream = response.GetResponseStream();
+            
+            WebResponse response = request.GetResponse();
+            Stream responseStream = response.GetResponseStream();
             using var readStream = new StreamReader(responseStream, Encoding.UTF8);
-            var responseString = readStream.ReadToEnd();
-
-            // Десериализация (перевод JSON'a к C# классу)
-            var task = JsonConvert.DeserializeObject<TaskModel>(responseString);
+            string responseString = readStream.ReadToEnd();
 
             Console.WriteLine("Deleted");
         }
         
-        public void FindTasktById(Guid reportId)
+        public void FindTaskById(Guid id)
         {
-            var request = HttpWebRequest.Create($"https://localhost:5001/tasks/GetTaskById?id={reportId}");
+            var request = WebRequest.Create($"https://localhost:5001/tasks/GetTaskById/?id={id}");
             request.Method = WebRequestMethods.Http.Get;
 
             try
             {
-                var response = request.GetResponse();
+                WebResponse response = request.GetResponse();
 
-                var responseStream = response.GetResponseStream();
+                Stream responseStream = response.GetResponseStream();
                 using var readStream = new StreamReader(responseStream, Encoding.UTF8);
-                var responseString = readStream.ReadToEnd();
+                string responseString = readStream.ReadToEnd();
 
-                var task = JsonConvert.DeserializeObject<TaskModel>(responseString);
+                TaskModel task = JsonConvert.DeserializeObject<TaskModel>(responseString);
                 
-                Console.WriteLine("Created Report:");
+                Console.WriteLine("Task Found:");
                 Console.WriteLine($"Id: {task.Id}");
                 Console.WriteLine($"Content: {task.Name}");
                 Console.WriteLine($"Status: {task.Status}");
@@ -82,49 +75,58 @@ namespace Reports.Clients
             }
             catch (WebException e)
             {
-                Console.WriteLine("Employee was not found");
+                Console.WriteLine("Task was not found");
                 Console.Error.WriteLine(e.Message);
             }
         }
         
         public void GetTaskByTime(DateTime time)
         {
-            var request = HttpWebRequest.Create($"https://localhost:5001/tasks/GetTasksByTime?time={time}");
+            var request = WebRequest.Create($"https://localhost:5001/tasks/GetTasksByTime/?time={time}");
             request.Method = WebRequestMethods.Http.Get;
 
             try
             {
-                var response = request.GetResponse();
+                WebResponse response = request.GetResponse();
 
-                var responseStream = response.GetResponseStream();
+                Stream responseStream = response.GetResponseStream();
                 using var readStream = new StreamReader(responseStream, Encoding.UTF8);
-                var responseString = readStream.ReadToEnd();
+                string responseString = readStream.ReadToEnd();
 
-                var task = JsonConvert.DeserializeObject<TaskModel>(responseString);
+                TaskModel task = JsonConvert.DeserializeObject<TaskModel>(responseString);
                 
-                Console.WriteLine($"ReportStatus = : {task}");;
+                Console.WriteLine("Task:");
+                Console.WriteLine($"Id: {task.Id}");
+                Console.WriteLine($"Content: {task.Name}");
+                Console.WriteLine($"Status: {task.Status}");
+                Console.WriteLine($"CreationTime: {task.CreationTime}");
+                Console.WriteLine($"Id: {task.FinishDate}");
+                Console.WriteLine($"Id: {task.LastChangeTime}");
+                Console.WriteLine($"Id: {task.EmployeeId}");
+                Console.WriteLine($"LastCommitDate: {task.FinalReportId}");
+                
             }
             catch (WebException e)
             {
-                Console.WriteLine("Employee was not found");
+                Console.WriteLine("Task was not found");
                 Console.Error.WriteLine(e.Message);
             }
         }
         
         public void GetAllTasks()
         {
-            var request = HttpWebRequest.Create($"https://localhost:5001/tasks/GetAll");
+            var request = WebRequest.Create($"https://localhost:5001/tasks/GetAll");
             request.Method = WebRequestMethods.Http.Get;
 
             try
             {
-                var response = request.GetResponse();
+                WebResponse response = request.GetResponse();
 
-                var responseStream = response.GetResponseStream();
+                Stream responseStream = response.GetResponseStream();
                 using var readStream = new StreamReader(responseStream, Encoding.UTF8);
-                var responseString = readStream.ReadToEnd();
+                string responseString = readStream.ReadToEnd();
 
-                var tasks = JsonConvert.DeserializeObject<List<TaskModel>>(responseString);
+                List<TaskModel> tasks = JsonConvert.DeserializeObject<List<TaskModel>>(responseString);
 
                 foreach (var task in tasks)
                 {
@@ -141,116 +143,116 @@ namespace Reports.Clients
             }
             catch (WebException e)
             {
-                Console.WriteLine("Employee was not found");
+                Console.WriteLine("Tasks was not found");
                 Console.Error.WriteLine(e.Message);
             }
         }
         
         public void GetLastChangeTime(Guid id)
         {
-            var request = HttpWebRequest.Create($"https://localhost:5001/tasks/GetLastChangeTime?id={id}");
+            var request = WebRequest.Create($"https://localhost:5001/tasks/GetLastChangeTime/?id={id}");
             request.Method = WebRequestMethods.Http.Get;
 
             try
             {
-                var response = request.GetResponse();
+                WebResponse response = request.GetResponse();
 
-                var responseStream = response.GetResponseStream();
+                Stream responseStream = response.GetResponseStream();
                 using var readStream = new StreamReader(responseStream, Encoding.UTF8);
-                var responseString = readStream.ReadToEnd();
+                string responseString = readStream.ReadToEnd();
 
-                var time = JsonConvert.DeserializeObject<DateTime>(responseString);
+                DateTime time = JsonConvert.DeserializeObject<DateTime>(responseString);
                 
-                Console.WriteLine($"ReportStatus = : {time}");;
+                Console.WriteLine($"LastChangeTime: {time}");;
             }
             catch (WebException e)
             {
-                Console.WriteLine("Employee was not found");
+                Console.WriteLine("Task was not found");
                 Console.Error.WriteLine(e.Message);
             }
         }
         
-        public void UpdateComment(string newComment)
+        public void UpdateComment(Guid id, string newComment)
         {
-            var request = HttpWebRequest.Create($"https://localhost:5001/tasks/UpdateComment?newComment={newComment}");
+            var request = WebRequest.Create($"https://localhost:5001/tasks/UpdateComment/?id={id}&&newComment={newComment}");
             request.Method = WebRequestMethods.Http.Put;
 
             try
             {
-                var response = request.GetResponse();
-                var responseStream = response.GetResponseStream();
+                WebResponse response = request.GetResponse();
+                Stream responseStream = response.GetResponseStream();
                 using var readStream = new StreamReader(responseStream, Encoding.UTF8);
-                var responseString = readStream.ReadToEnd();
+                string responseString = readStream.ReadToEnd();
                 
                 Console.WriteLine("Updated");
             }
             catch (WebException e)
             {
-                Console.WriteLine("Employee was not found");
+                Console.WriteLine("Task was not found");
                 Console.Error.WriteLine(e.Message);
             }
         }
         
-        public void UpdateStatus(ReportStatus status)
+        public void UpdateStatus(Guid id, ReportStatus status)
         {
-            var request = HttpWebRequest.Create($"https://localhost:5001/tasks/UpdateStatus?status={status}");
+            var request = WebRequest.Create($"https://localhost:5001/tasks/UpdateStatus/?if={id}&&status={status}");
             request.Method = WebRequestMethods.Http.Put;
 
             try
             {
-                var response = request.GetResponse();
-                var responseStream = response.GetResponseStream();
+                WebResponse response = request.GetResponse();
+                Stream responseStream = response.GetResponseStream();
                 using var readStream = new StreamReader(responseStream, Encoding.UTF8);
-                var responseString = readStream.ReadToEnd();
+                string responseString = readStream.ReadToEnd();
                 
                 Console.WriteLine("Updated");
             }
             catch (WebException e)
             {
-                Console.WriteLine("Employee was not found");
+                Console.WriteLine("Task was not found");
                 Console.Error.WriteLine(e.Message);
             }
         }
         
-        public void UpdateEmployee(Guid id)
+        public void UpdateEmployee(Guid id, Guid newEmployeeId)
         {
-            var request = HttpWebRequest.Create($"https://localhost:5001/tasks/UpdateStatus?status={id}");
+            var request = WebRequest.Create($"https://localhost:5001/tasks/UpdateEmployee/?id={id}&&status={newEmployeeId}");
             request.Method = WebRequestMethods.Http.Put;
 
             try
             {
-                var response = request.GetResponse();
-                var responseStream = response.GetResponseStream();
+                WebResponse response = request.GetResponse();
+                Stream responseStream = response.GetResponseStream();
                 using var readStream = new StreamReader(responseStream, Encoding.UTF8);
-                var responseString = readStream.ReadToEnd();
+                string responseString = readStream.ReadToEnd();
                 
                 Console.WriteLine("Updated");
             }
             catch (WebException e)
             {
-                Console.WriteLine("Employee was not found");
+                Console.WriteLine("Task was not found");
                 Console.Error.WriteLine(e.Message);
             }
         }
         
-        public void GetAllTasksByEmployee(Guid id)
+        public void GetAllTasksByEmployee(Guid employeeId)
         {
-            var request = HttpWebRequest.Create($"https://localhost:5001/tasks/GetAll");
+            var request = WebRequest.Create($"https://localhost:5001/tasks/GetAllTasksByEmployee/?employeeId={employeeId}");
             request.Method = WebRequestMethods.Http.Get;
 
             try
             {
-                var response = request.GetResponse();
+                WebResponse response = request.GetResponse();
 
-                var responseStream = response.GetResponseStream();
+                Stream responseStream = response.GetResponseStream();
                 using var readStream = new StreamReader(responseStream, Encoding.UTF8);
-                var responseString = readStream.ReadToEnd();
+                string responseString = readStream.ReadToEnd();
 
-                var tasks = JsonConvert.DeserializeObject<List<TaskModel>>(responseString);
+                List<TaskModel> tasks = JsonConvert.DeserializeObject<List<TaskModel>>(responseString);
 
                 foreach (var task in tasks)
                 {
-                    Console.WriteLine("Created Report:");
+                    Console.WriteLine("Task:");
                     Console.WriteLine($"Id: {task.Id}");
                     Console.WriteLine($"Content: {task.Name}");
                     Console.WriteLine($"Status: {task.Status}");
@@ -258,34 +260,34 @@ namespace Reports.Clients
                     Console.WriteLine($"Id: {task.FinishDate}");
                     Console.WriteLine($"Id: {task.LastChangeTime}");
                     Console.WriteLine($"Id: {task.EmployeeId}");
-                    Console.WriteLine($"LastCommitDate: {task.FinalReportId}");
+                    Console.WriteLine($"LastCommitDate: {task.FinalReportId}/n");
                 }
             }
             catch (WebException e)
             {
-                Console.WriteLine("Employee was not found");
+                Console.WriteLine("Tasks was not found");
                 Console.Error.WriteLine(e.Message);
             }
         }
         
-        public void GetAllTasksByLead(Guid id)
+        public void GetAllTasksByLead(Guid leadId)
         {
-            var request = HttpWebRequest.Create($"https://localhost:5001/tasks/GetAll");
+            var request = WebRequest.Create($"https://localhost:5001/tasks/GetAllTasksByLead/?leadId={leadId}");
             request.Method = WebRequestMethods.Http.Get;
 
             try
             {
-                var response = request.GetResponse();
+                WebResponse response = request.GetResponse();
 
-                var responseStream = response.GetResponseStream();
+                Stream responseStream = response.GetResponseStream();
                 using var readStream = new StreamReader(responseStream, Encoding.UTF8);
-                var responseString = readStream.ReadToEnd();
+                string responseString = readStream.ReadToEnd();
 
-                var tasks = JsonConvert.DeserializeObject<List<TaskModel>>(responseString);
+                List<TaskModel> tasks = JsonConvert.DeserializeObject<List<TaskModel>>(responseString);
 
                 foreach (var task in tasks)
                 {
-                    Console.WriteLine("Created Report:");
+                    Console.WriteLine("Task:");
                     Console.WriteLine($"Id: {task.Id}");
                     Console.WriteLine($"Content: {task.Name}");
                     Console.WriteLine($"Status: {task.Status}");
@@ -293,7 +295,7 @@ namespace Reports.Clients
                     Console.WriteLine($"Id: {task.FinishDate}");
                     Console.WriteLine($"Id: {task.LastChangeTime}");
                     Console.WriteLine($"Id: {task.EmployeeId}");
-                    Console.WriteLine($"LastCommitDate: {task.FinalReportId}");
+                    Console.WriteLine($"LastCommitDate: {task.FinalReportId}/n");
                 }
             }
             catch (WebException e)

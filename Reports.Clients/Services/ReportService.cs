@@ -4,27 +4,25 @@ using System.IO;
 using System.Net;
 using System.Text;
 using Newtonsoft.Json;
+using Reports.Clients.Interfaces;
 using Reports.DAL.Entities;
 using Reports.DAL.Statuses;
 
 namespace Reports.Clients
 {
-    public class ReportService
+    public class ReportService : IReportService
     {
-        public void CreateReport(Guid teamLeadId)
+        public void CreateReport(Guid employeeId, Guid finalReportId)
         {
-            // Запрос к серверу
-            var request = HttpWebRequest.Create($"https://localhost:5001/re/Create");
+            var request = WebRequest.Create($"https://localhost:5001/reports/Create/?employeeId={employeeId}&&finalReportId={finalReportId}");
             request.Method = WebRequestMethods.Http.Post;
-            var response = request.GetResponse();
-
-            // Чтение ответа
-            var responseStream = response.GetResponseStream();
+            WebResponse response = request.GetResponse();
+            
+            Stream responseStream = response.GetResponseStream();
             using var readStream = new StreamReader(responseStream, Encoding.UTF8);
-            var responseString = readStream.ReadToEnd();
-
-            // Десериализация (перевод JSON'a к C# классу)
-            var report = JsonConvert.DeserializeObject<Report>(responseString);
+            string responseString = readStream.ReadToEnd();
+            
+            Report report = JsonConvert.DeserializeObject<Report>(responseString);
 
             Console.WriteLine("Created Report:");
             Console.WriteLine($"Id: {report.Id}");
@@ -35,38 +33,33 @@ namespace Reports.Clients
             Console.WriteLine($"LastCommitDate: {report.LastCommitDate}");
         }
         
-        public void Deletet(Guid id)
+        public void Delete(Guid id)
         {
-            // Запрос к серверу
-            var request = HttpWebRequest.Create($"https://localhost:5001/reports/Delete?{id}");
+            WebRequest request = HttpWebRequest.Create($"https://localhost:5001/reports/Delete/?id={id}");
             request.Method = WebRequestMethods.Http.Get;
-            var response = request.GetResponse();
-
-            // Чтение ответа
-            var responseStream = response.GetResponseStream();
+            WebResponse response = request.GetResponse();
+            
+            Stream responseStream = response.GetResponseStream();
             using var readStream = new StreamReader(responseStream, Encoding.UTF8);
-            var responseString = readStream.ReadToEnd();
-
-            // Десериализация (перевод JSON'a к C# классу)
-            var report = JsonConvert.DeserializeObject<Report>(responseString);
+            string responseString = readStream.ReadToEnd();
 
             Console.WriteLine("Deleted");
         }
         
-        public void FindReportById(Guid reportId)
+        public void FindReportById(Guid id)
         {
-            var request = HttpWebRequest.Create($"https://localhost:5001/reports/GetById?id={reportId}");
+            var request = WebRequest.Create($"https://localhost:5001/reports/GetById/?id={id}");
             request.Method = WebRequestMethods.Http.Get;
 
             try
             {
-                var response = request.GetResponse();
+                WebResponse response = request.GetResponse();
 
-                var responseStream = response.GetResponseStream();
+                Stream responseStream = response.GetResponseStream();
                 using var readStream = new StreamReader(responseStream, Encoding.UTF8);
-                var responseString = readStream.ReadToEnd();
+                string responseString = readStream.ReadToEnd();
 
-                var report = JsonConvert.DeserializeObject<Report>(responseString);
+                Report report = JsonConvert.DeserializeObject<Report>(responseString);
                 
                 Console.WriteLine("Created Report:");
                 Console.WriteLine($"Id: {report.Id}");
@@ -78,27 +71,27 @@ namespace Reports.Clients
             }
             catch (WebException e)
             {
-                Console.WriteLine("Employee was not found");
+                Console.WriteLine("report was not found");
                 Console.Error.WriteLine(e.Message);
             }
         }
         
-        public void GetReportStatus(Guid reportId)
+        public void GetReportStatus(Guid id)
         {
-            var request = HttpWebRequest.Create($"https://localhost:5001/reports/GetById?id={reportId}");
+            WebRequest request = HttpWebRequest.Create($"https://localhost:5001/reports/Status/?id={id}");
             request.Method = WebRequestMethods.Http.Get;
 
             try
             {
-                var response = request.GetResponse();
+                WebResponse response = request.GetResponse();
 
-                var responseStream = response.GetResponseStream();
+                Stream responseStream = response.GetResponseStream();
                 using var readStream = new StreamReader(responseStream, Encoding.UTF8);
-                var responseString = readStream.ReadToEnd();
+                string responseString = readStream.ReadToEnd();
 
-                var reportStatus = JsonConvert.DeserializeObject<ReportStatus>(responseString);
+                ReportStatus reportStatus = JsonConvert.DeserializeObject<ReportStatus>(responseString);
                 
-                Console.WriteLine($"ReportStatus = : {reportStatus}");;
+                Console.WriteLine($"ReportStatus: {reportStatus}");;
             }
             catch (WebException e)
             {
@@ -109,20 +102,20 @@ namespace Reports.Clients
         
         public void GetAllReports()
         {
-            var request = HttpWebRequest.Create($"https://localhost:5001/reports/GetAll");
+            var request = WebRequest.Create($"https://localhost:5001/reports/GetAll");
             request.Method = WebRequestMethods.Http.Get;
 
             try
             {
-                var response = request.GetResponse();
+                WebResponse response = request.GetResponse();
 
-                var responseStream = response.GetResponseStream();
+                Stream responseStream = response.GetResponseStream();
                 using var readStream = new StreamReader(responseStream, Encoding.UTF8);
-                var responseString = readStream.ReadToEnd();
+                string responseString = readStream.ReadToEnd();
 
-                var reports = JsonConvert.DeserializeObject<List<Report>>(responseString);
+                List<Report> reports = JsonConvert.DeserializeObject<List<Report>>(responseString);
 
-                foreach (var report in reports)
+                foreach (Report report in reports)
                 {
                     Console.WriteLine("Created Report:");
                     Console.WriteLine($"Id: {report.Id}");
@@ -135,49 +128,49 @@ namespace Reports.Clients
             }
             catch (WebException e)
             {
-                Console.WriteLine("Employee was not found");
+                Console.WriteLine("report was not found");
                 Console.Error.WriteLine(e.Message);
             }
         }
         
-        public void UpdateContent(string content)
+        public void UpdateContent(Guid id, string content)
         {
-            var request = HttpWebRequest.Create($"https://localhost:5001/UpdateContent?id={content}");
+            var request = WebRequest.Create($"https://localhost:5001/UpdateContent/?id={id}&&content={content}");
             request.Method = WebRequestMethods.Http.Put;
 
             try
             {
-                var response = request.GetResponse();
-                var responseStream = response.GetResponseStream();
+                WebResponse response = request.GetResponse();
+                Stream responseStream = response.GetResponseStream();
                 using var readStream = new StreamReader(responseStream, Encoding.UTF8);
-                var responseString = readStream.ReadToEnd();
+                string responseString = readStream.ReadToEnd();
                 
                 Console.WriteLine("Updated");
             }
             catch (WebException e)
             {
-                Console.WriteLine("Employee was not found");
+                Console.WriteLine("report was not found");
                 Console.Error.WriteLine(e.Message);
             }
         }
         
-        public void UpdateStatus(ReportStatus status)
+        public void UpdateStatus(Guid id, ReportStatus status)
         {
-            var request = HttpWebRequest.Create($"https://localhost:5001/UpdateStatus?status={status}");
+            var request = WebRequest.Create($"https://localhost:5001/UpdateStatus/?id={id}&&status={status}");
             request.Method = WebRequestMethods.Http.Put;
 
             try
             {
-                var response = request.GetResponse();
-                var responseStream = response.GetResponseStream();
+                WebResponse response = request.GetResponse();
+                Stream responseStream = response.GetResponseStream();
                 using var readStream = new StreamReader(responseStream, Encoding.UTF8);
-                var responseString = readStream.ReadToEnd();
+                string responseString = readStream.ReadToEnd();
                 
                 Console.WriteLine("Updated");
             }
             catch (WebException e)
             {
-                Console.WriteLine("Employee was not found");
+                Console.WriteLine("report was not found");
                 Console.Error.WriteLine(e.Message);
             }
         }

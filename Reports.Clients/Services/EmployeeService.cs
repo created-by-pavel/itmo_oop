@@ -5,25 +5,26 @@ using System.Net;
 using System.Text;
 using Newtonsoft.Json;
 using Reports.DAL.Entities;
+using Reports.Clients.Interfaces;
 
 namespace Reports.Clients
 {
-    public class EmployeeService
+    public class EmployeeService : IEmployeeService
     {
         public void CreateEmployee(string name)
         {
             // Запрос к серверу
-            var request = HttpWebRequest.Create($"https://localhost:5001/employees/Create/?name={name}");
+            var request = WebRequest.Create($"https://localhost:5001/employees/Create/?name={name}");
             request.Method = WebRequestMethods.Http.Post;
-            var response = request.GetResponse();
 
             // Чтение ответа
-            var responseStream = response.GetResponseStream();
+            WebResponse response = request.GetResponse();
+            Stream responseStream = response.GetResponseStream();
             using var readStream = new StreamReader(responseStream, Encoding.UTF8);
-            var responseString = readStream.ReadToEnd();
+            string responseString = readStream.ReadToEnd();
 
             // Десериализация (перевод JSON'a к C# классу)
-            var employee = JsonConvert.DeserializeObject<Employee>(responseString);
+            Employee employee = JsonConvert.DeserializeObject<Employee>(responseString);
 
             Console.WriteLine("Created employee:");
             Console.WriteLine($"Id: {employee.Id}");
@@ -33,18 +34,18 @@ namespace Reports.Clients
         
         public void FindEmployeeById(Guid id)
         {
-            var request = HttpWebRequest.Create($"https://localhost:5001/employees/GetById/?id={id}");
+            var request = WebRequest.Create($"https://localhost:5001/employees/GetById/?id={id}");
             request.Method = WebRequestMethods.Http.Get;
+            
 
             try
             {
-                var response = request.GetResponse();
-                
-                var responseStream = response.GetResponseStream();
+                WebResponse response = request.GetResponse();
+                Stream responseStream = response.GetResponseStream();
                 using var readStream = new StreamReader(responseStream, Encoding.UTF8);
-                var responseString = readStream.ReadToEnd();
+                string responseString = readStream.ReadToEnd();
                 
-                var employee = JsonConvert.DeserializeObject<Employee>(responseString);
+                Employee employee = JsonConvert.DeserializeObject<Employee>(responseString);
 
                 Console.WriteLine("Found employee by id:");
                 Console.WriteLine($"Id: {employee.Id}");
@@ -60,28 +61,28 @@ namespace Reports.Clients
         
         public void Delete(Guid id)
         {
-            var request = HttpWebRequest.Create($"https://localhost:5001/employees/Delete?={id}");
+            var request = WebRequest.Create($"https://localhost:5001/employees/Delete?={id}");
             request.Method = WebRequestMethods.Http.Put;
-            var response = request.GetResponse();
+            WebResponse response = request.GetResponse();
                 
-            var responseStream = response.GetResponseStream();
+            Stream responseStream = response.GetResponseStream();
             using var readStream = new StreamReader(responseStream, Encoding.UTF8);
-            var responseString = readStream.ReadToEnd();
+            string responseString = readStream.ReadToEnd();
 
             Console.WriteLine("employee was deleted");
         }
         
-        public void UpdateLead(Guid id)
+        public void UpdateLead(Guid id, Guid employeeId)
         {
-            var request = HttpWebRequest.Create($"https://localhost:5001/employees/NewLead?id={id}");
+            var request = WebRequest.Create($"https://localhost:5001/employees/NewLead?id={id}&&employeeId={employeeId}");
             request.Method = WebRequestMethods.Http.Put;
 
             try
             {
-                var response = request.GetResponse();
-                var responseStream = response.GetResponseStream();
+                WebResponse response = request.GetResponse();
+                Stream responseStream = response.GetResponseStream();
                 using var readStream = new StreamReader(responseStream, Encoding.UTF8);
-                var responseString = readStream.ReadToEnd();
+                string responseString = readStream.ReadToEnd();
                 
                 Console.WriteLine("Updated");
             }
@@ -93,23 +94,24 @@ namespace Reports.Clients
         }
         public void GetAll()
         {
-            var request = HttpWebRequest.Create($"https://localhost:5001/employees/GetAll");
+            var request = WebRequest.Create($"https://localhost:5001/employees/GetAll");
             request.Method = WebRequestMethods.Http.Get;
 
             try
             {
-                var response = request.GetResponse();
-                var responseStream = response.GetResponseStream();
+                WebResponse response = request.GetResponse();
+                Stream responseStream = response.GetResponseStream();
                 using var readStream = new StreamReader(responseStream, Encoding.UTF8);
-                var responseString = readStream.ReadToEnd();
-                var employees = JsonConvert.DeserializeObject<List<Employee>>(responseString);
+                string responseString = readStream.ReadToEnd();
+                
+                List<Employee> employees = JsonConvert.DeserializeObject<List<Employee>>(responseString);
                 Console.WriteLine("Found employees:");
                 
                 foreach (var employee in employees)
                 {
                     Console.WriteLine($"Id: {employee.Id}");
                     Console.WriteLine($"Name: {employee.Name}");
-                    Console.WriteLine($"Lead: {employee.LeadId}");
+                    Console.WriteLine($"Lead: {employee.LeadId}/n");
                 }
             }
             catch (WebException e)

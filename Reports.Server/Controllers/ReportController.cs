@@ -42,7 +42,7 @@ namespace Reports.Server.Controllers
              return Ok();
          }
         
-         [HttpGet("/reports/GetBy")]
+         [HttpGet("/reports/GetById")]
          public IActionResult Find([FromQuery] Guid id)
          {
              var userId = User.Claims.Single(x => x.Type == ClaimTypes.NameIdentifier).Value;

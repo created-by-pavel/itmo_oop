@@ -17,7 +17,6 @@ namespace Reports.Server.Controllers
     [ApiController]
     [Authorize]
     [Route("/tasks")]
-    //[Authorize]
     public class TasksController : ControllerBase
     {
         private readonly ITaskModelService _service;
