@@ -68,21 +68,7 @@ namespace Banks.Tests
             _time.SkipDay();
             Assert.AreEqual(10, _pavelDebit.GetPercentOrCommissionBalance());
         }
-        
-        [Test]
-        public void SkipMonthForDebit()
-        {
-            _time.SkipMonth();
-            Assert.AreEqual(100_290, _pavelDebit.GetBalance());
-        }
-        
-        [Test]
-        public void SkipTermForDeposit()
-        {
-            _time.SkipYear();
-            Assert.AreEqual(40095.34, decimal.Round(_kolyaDeposit.GetBalance(), 2));
-        }
-        
+
         [Test]
         public void CancelOperation()
         {
